@@ -1,0 +1,215 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f172a;
+    color: white;
+    overflow-x: hidden;
+}
+
+/* ================= NAVBAR ================= */
+
+.navbar {
+    position: absolute;
+    width: 100%;
+    padding: 25px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.center-nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.center-nav a {
+    position: relative;
+    margin: 0 20px;
+    color: #ccc;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s ease;
+}
+
+.center-nav a:hover {
+    color: white;
+    transform: translateY(-3px);
+}
+
+.center-nav a::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    width: 0%;
+    height: 2px;
+    background: #4da3ff;
+    transform: translateX(-50%);
+    transition: 0.3s ease;
+}
+
+.center-nav a:hover::after {
+    width: 100%;
+}
+
+.btn-login {
+    background: white;
+    color: #111;
+    padding: 8px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+}
+
+/* ================= HERO ================= */
+
+.hero {
+    min-height: 100vh;
+    background: url("/assets/sekolah.jpg") center/cover no-repeat;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(15, 23, 42, 0.85),
+        rgba(15, 23, 42, 0.75)
+    );
+    backdrop-filter: blur(4px);
+    z-index: 1;
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1000px;
+    padding: 120px 20px 80px;
+}
+
+/* ================= HERO CONTENT ================= */
+
+.hero-content {
+    margin-bottom: 60px;
+    animation: fadeUp 1s ease forwards;
+    opacity: 0;
+    transform: translateY(40px);
+}
+
+.hero h1 {
+    font-size: 42px;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 18px;
+    color: #ddd;
+    margin-bottom: 30px;
+}
+
+.btn-primary {
+    background: #4da3ff;
+    padding: 12px 30px;
+    border-radius: 25px;
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    background: #2d8df0;
+}
+
+/* ================= INFO BOX ================= */
+
+.info-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(12px);
+    width: 280px;
+    text-align: left;
+    animation: fadeUp 1.4s ease forwards;
+    opacity: 0;
+    transform: translateY(40px);
+}
+
+.info-card h3 {
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.info-card ul {
+    list-style: none;
+}
+
+.info-card li {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #ddd;
+    padding-left: 15px;
+    position: relative;
+}
+
+.info-card li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #4da3ff;
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+    .navbar {
+        padding: 20px;
+    }
+
+    .center-nav {
+        display: none;
+    }
+
+    .hero h1 {
+        font-size: 28px;
+    }
+
+    .info-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+}
