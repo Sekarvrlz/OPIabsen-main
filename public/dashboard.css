@@ -1,0 +1,287 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+/* BODY */
+
+body{
+
+background:linear-gradient(135deg,#1e3a8a,#2563eb);
+
+min-height:100vh;
+
+}
+
+
+
+/* HEADER */
+
+.header{
+
+height:55px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:0 20px;
+
+color:white;
+
+background:rgba(0,0,0,0.25);
+
+backdrop-filter:blur(8px);
+
+}
+
+.title{
+
+font-weight:600;
+
+letter-spacing:1px;
+
+}
+
+.menu-btn{
+
+font-size:22px;
+
+cursor:pointer;
+
+}
+
+
+
+/* SIDEBAR */
+
+.sidebar{
+
+position:fixed;
+
+left:-220px;
+
+top:55px;
+
+width:200px;
+
+height:100%;
+
+background:#1e3a8a;
+
+padding:20px;
+
+transition:0.4s;
+
+color:white;
+
+}
+
+.sidebar.active{
+
+left:0;
+
+}
+
+.sidebar ul{
+
+list-style:none;
+
+}
+
+.sidebar ul li{
+
+padding:10px;
+
+margin:10px 0;
+
+border-radius:6px;
+
+cursor:pointer;
+
+transition:0.3s;
+
+}
+
+.sidebar ul li:hover{
+
+background:#2563eb;
+
+padding-left:15px;
+
+}
+
+
+
+/* MAIN */
+
+.main{
+
+padding:40px;
+
+}
+
+
+
+/* CARDS */
+
+.cards{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+
+gap:25px;
+
+max-width:750px;
+
+margin:0 auto 40px auto;
+
+}
+
+
+
+/* CARD */
+
+.card{
+
+background:rgba(255,255,255,0.2);
+
+backdrop-filter:blur(10px);
+
+padding:20px;
+
+border-radius:12px;
+
+text-align:center;
+
+color:white;
+
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+
+transition:0.3s;
+
+}
+
+.card:hover{
+
+transform:translateY(-8px) scale(1.03);
+
+background:rgba(255,255,255,0.35);
+
+}
+
+.icon{
+
+font-size:30px;
+
+margin-bottom:8px;
+
+}
+
+.card h3{
+
+margin-bottom:6px;
+
+}
+
+.card p{
+
+font-size:13px;
+
+margin-bottom:12px;
+
+}
+
+.card button{
+
+padding:7px 15px;
+
+border:none;
+
+background:white;
+
+color:#1e3a8a;
+
+border-radius:5px;
+
+cursor:pointer;
+
+font-size:12px;
+
+transition:0.3s;
+
+}
+
+.card button:hover{
+
+background:#dbeafe;
+
+}
+
+
+
+/* CHART */
+
+.chart-container{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:25px;
+
+max-width:900px;
+
+margin:auto;
+
+}
+
+
+
+/* CHART BOX */
+
+.chart-box{
+
+background:rgba(255,255,255,0.9);
+
+padding:20px;
+
+border-radius:12px;
+
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+
+transition:0.3s;
+
+}
+
+.chart-box:hover{
+
+transform:scale(1.02);
+
+}
+
+.chart-box h3{
+
+margin-bottom:10px;
+
+color:#1e3a8a;
+
+font-size:15px;
+
+}
+
+.sidebar ul li a{
+    text-decoration:none;
+    color:white;
+    display:block;
+    padding:10px;
+}
+
+.sidebar ul li a:hover{
+    background:#1e3a8a;
+}
