@@ -109,6 +109,7 @@ class Dashboard extends BaseController
                 'last_seen_at' => (string) ($row['last_seen_at'] ?? ''),
                 'last_seen_human' => (string) ($row['last_seen_human'] ?? '-'),
                 'last_ip' => (string) ($row['last_ip'] ?? '-'),
+                'lan_ip' => (string) ($row['lan_ip'] ?? ''),
                 'last_message' => (string) ($row['last_message'] ?? ''),
             ];
         }

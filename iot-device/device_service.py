@@ -866,16 +866,24 @@ class IotApiClient:
         session_token: str = "",
         message: str = "",
     ) -> dict:
+        import socket
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+        except Exception:
+            local_ip = ""
         data = {
             "device_code": cfg.device_code,
             "device_name": cfg.device_name,
             "mode": mode,
             "message": message[:255],
             "firmware_version": cfg.firmware_version,
+            "ip": local_ip,
         }
         if session_token:
             data["session_token"] = session_token
-
         resp = requests.post(
             self.heartbeat_url,
             headers=self._headers(),

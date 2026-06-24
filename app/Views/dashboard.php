@@ -53,7 +53,8 @@
                         <th>Status</th>
                         <th>Mode</th>
                         <th>Last Seen</th>
-                        <th>IP</th>
+                        <th>IP Server</th>
+                    <th>IP LAN Aktif</th>
                         <th>Catatan</th>
                     </tr>
                 </thead>
@@ -73,12 +74,13 @@
                                 <td><?= esc(strtoupper((string) $row['status_mode'])) ?></td>
                                 <td><?= esc((string) $row['last_seen_human']) ?></td>
                                 <td><?= esc((string) ($row['last_ip'] !== '' ? $row['last_ip'] : '-')) ?></td>
+                                <td><?= esc((string) ($row['lan_ip'] !== '' ? $row['lan_ip'] : '-')) ?></td>
                                 <td><?= esc((string) ($row['last_message'] !== '' ? $row['last_message'] : '-')) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6">Belum ada alat IoT yang mengirim heartbeat ke sistem.</td>
+                            <td colspan="7">Belum ada alat IoT yang mengirim heartbeat ke sistem.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
