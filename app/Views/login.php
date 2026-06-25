@@ -26,10 +26,16 @@
 
             <div class="field-block">
                 <label for="captcha">Masukkan Captcha</label>
-                <input id="captcha" type="text" name="captcha" inputmode="numeric" required>
+                <div class="captcha-box">
+                    <img src="<?= $captchaImage ?>" 
+                         alt="captcha" 
+                         title="Klik untuk refresh"
+                         onclick="window.location.reload()">
+                </div>
+                <input id="captcha" type="text" name="captcha"
+                       maxlength="5" required autocomplete="off"
+                    placeholder="Ketik 5 karakter di atas">
             </div>
-
-            <div class="captcha-box"><?= esc((string) $captcha) ?></div>
 
             <button type="submit" class="auth-btn primary block">Login</button>
 

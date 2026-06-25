@@ -289,4 +289,19 @@ class Akun extends BaseController
         return array_values($response);
     }
 
+    private function checkPasswordStrength(string $password): string
+    {
+        $hasUpper  = preg_match('/[A-Z]/', $password);
+        $hasLower  = preg_match('/[a-z]/', $password);
+        $hasDigit  = preg_match('/[0-9]/', $password);
+        $hasSymbol = preg_match('/[\W_]/', $password);
+        $len       = strlen($password);
+
+        $score = (int)$hasUpper + (int)$hasLower + (int)$hasDigit + (int)$hasSymbol;
+
+        if ($len < 6)              return 'lemah';
+        if ($score <= 2 || $len < 8) return 'sedang';
+        return 'kuat';
+    }
+
 }
