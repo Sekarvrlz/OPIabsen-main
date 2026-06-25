@@ -25,7 +25,7 @@ foreach ($students as $student) {
 
 <section class="panel report-filter-panel">
     <form class="report-filter" action="<?= base_url('presensi/manual') ?>" method="get">
-        <div class="report-filter-main">
+        <div class="report-filter-main" style="grid-template-columns: minmax(160px, 260px) auto;">
             <div class="field report-class-field">
                 <label for="kelas">Kelas</label>
                 <select id="kelas" name="kelas">

@@ -1265,3 +1265,8 @@ button[disabled] {
         font-size: 10px;
     }
 }
+
+.report-filter-main {
+    grid-template-columns: minmax(160px, 260px) auto !important;
+    align-items: end;
+}

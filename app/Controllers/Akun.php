@@ -86,6 +86,10 @@ class Akun extends BaseController
                 return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
             }
 
+            if ($this->checkPasswordStrength($payload['password']) === 'lemah') {
+                return redirect()->back()->withInput()->with('error', 'Password terlalu lemah. Gunakan minimal 8 karakter dengan huruf besar, angka, dan karakter spesial.');
+            }
+
             $model = new OperatorModel();
             $model->insert([
                 'username' => $payload['username'],
@@ -103,6 +107,10 @@ class Akun extends BaseController
             'password' => 'required|min_length[6]',
         ])) {
             return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
+        }
+
+        if ($this->checkPasswordStrength($payload['password']) === 'lemah') {
+            return redirect()->back()->withInput()->with('error', 'Password terlalu lemah. Gunakan minimal 8 karakter dengan huruf besar, angka, dan karakter spesial.');
         }
 
         $response = $this->client->post('guru', [
@@ -177,20 +185,25 @@ class Akun extends BaseController
                 return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
             }
 
-            $payload = [
+            if ($password !== '' && $this->checkPasswordStrength($password) === 'lemah') {
+                return redirect()->back()->withInput()->with('error', 'Password terlalu lemah. Gunakan minimal 8 karakter dengan huruf besar, angka, dan karakter spesial.');
+            }
+
+            $updatePayload = [
                 'username' => $username,
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
             if ($password !== '') {
-                $payload['password'] = password_hash($password, PASSWORD_DEFAULT);
+                $updatePayload['password'] = password_hash($password, PASSWORD_DEFAULT);
             }
-            $model->update($id, $payload);
+            $model->update($id, $updatePayload);
             return redirect()->to('/admin/akun')->with('success', 'Akun admin berhasil diperbarui.');
         }
 
         if ($role !== 'guru') {
             return redirect()->to('/admin/akun')->with('error', 'Role akun tidak valid.');
         }
+
         $existing = $this->client->get('guru/' . $id);
         if ($this->isApiError($existing)) {
             return redirect()->to('/admin/akun')->with('error', $existing['message']);
@@ -198,6 +211,7 @@ class Akun extends BaseController
         if (! $existing || isset($existing['message'])) {
             return redirect()->to('/admin/akun')->with('error', 'Akun guru tidak ditemukan.');
         }
+
         if (! $this->validateData([
             'username' => $username,
             'password' => $password,
@@ -210,16 +224,20 @@ class Akun extends BaseController
             return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
         }
 
-        $payload = [
+        if ($password !== '' && $this->checkPasswordStrength($password) === 'lemah') {
+            return redirect()->back()->withInput()->with('error', 'Password terlalu lemah. Gunakan minimal 8 karakter dengan huruf besar, angka, dan karakter spesial.');
+        }
+
+        $updatePayload = [
             'nama' => trim((string) $this->request->getPost('nama')),
             'username' => $username,
         ];
 
         if ($password !== '') {
-            $payload['password'] = password_hash($password, PASSWORD_DEFAULT);
+            $updatePayload['password'] = password_hash($password, PASSWORD_DEFAULT);
         }
 
-        $response = $this->client->put('guru/' . $id, $payload);
+        $response = $this->client->put('guru/' . $id, $updatePayload);
         if ($this->isApiError($response) || (isset($response['message']) && ! isset($response['id_guru']))) {
             return redirect()->back()->withInput()->with('error', $this->apiMessage($response, 'Gagal memperbarui akun guru.'));
         }
@@ -246,6 +264,7 @@ class Akun extends BaseController
         if ($role !== 'guru') {
             return redirect()->to('/admin/akun')->with('error', 'Role akun tidak valid.');
         }
+
         $deleteMode = trim((string) $this->request->getPost('delete_guru_data'));
         if (! in_array($deleteMode, ['yes', 'no'], true)) {
             return redirect()->to('/admin/akun')->with('error', 'Pilih opsi hapus akun guru terlebih dahulu.');
@@ -264,7 +283,6 @@ class Akun extends BaseController
             if ($this->isApiError($response) || (($response['message'] ?? '') !== 'Deleted')) {
                 return redirect()->to('/admin/akun')->with('error', $this->apiMessage($response, 'Gagal menghapus data guru.'));
             }
-
             return redirect()->to('/admin/akun')->with('success', 'Akun dan data guru berhasil dihapus.');
         }
 
@@ -285,7 +303,6 @@ class Akun extends BaseController
         if (! is_array($response) || array_key_exists('message', $response)) {
             return [];
         }
-
         return array_values($response);
     }
 
@@ -299,9 +316,8 @@ class Akun extends BaseController
 
         $score = (int)$hasUpper + (int)$hasLower + (int)$hasDigit + (int)$hasSymbol;
 
-        if ($len < 6)              return 'lemah';
+        if ($len < 6)                return 'lemah';
         if ($score <= 2 || $len < 8) return 'sedang';
         return 'kuat';
     }
-
 }

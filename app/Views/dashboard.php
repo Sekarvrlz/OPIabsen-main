@@ -54,7 +54,7 @@
                         <th>Mode</th>
                         <th>Last Seen</th>
                         <th>IP Server</th>
-                    <th>IP LAN Aktif</th>
+                        <th>IP LAN Aktif</th>
                         <th>Catatan</th>
                     </tr>
                 </thead>
