@@ -98,52 +98,28 @@ class Auth extends BaseController
     private function generateCaptchaImage(string $text): string
     {
         $width    = 180;
-        $height   = 56;
-        $fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf';
+        $height   = 60;
+        $fontPath = FCPATH . 'fonts/captcha.ttf';
 
         $img = imagecreatetruecolor($width, $height);
+        $white = imagecolorallocate($img, 255, 255, 255);
+        imagefill($img, 0, 0, $white);
 
-        // Background gradient
-        for ($x = 0; $x < $width; $x++) {
-            $r   = (int) (220 + ($x / $width) * 30);
-            $g   = (int) (225 + ($x / $width) * 20);
-            $b   = (int) (235 + ($x / $width) * 15);
-            $col = imagecolorallocate($img, min($r, 255), min($g, 255), min($b, 255));
-            imageline($img, $x, 0, $x, $height, $col);
-        }
-
-        // Noise dots
-        for ($i = 0; $i < 200; $i++) {
-            $dot = imagecolorallocate($img, rand(100, 190), rand(100, 190), rand(100, 190));
+        // noise tipis aja, biar nggak mengganggu tapi tetap nyusahin OCR sederhana
+        for ($i = 0; $i < 25; $i++) {
+            $dot = imagecolorallocate($img, rand(210, 235), rand(210, 235), rand(210, 235));
             imagesetpixel($img, rand(0, $width - 1), rand(0, $height - 1), $dot);
         }
 
-        // Bezier curve noise lines
-        for ($i = 0; $i < 6; $i++) {
-            $lc  = imagecolorallocate($img, rand(120, 180), rand(120, 180), rand(120, 180));
-            $x1  = rand(0, $width / 2);
-            $y1  = rand(0, $height);
-            $x2  = rand($width / 2, $width);
-            $y2  = rand(0, $height);
-            $cpx = rand(0, $width);
-            $cpy = rand(0, $height);
-            for ($t = 0; $t <= 1; $t += 0.02) {
-                $bx = (int) ((1 - $t) * (1 - $t) * $x1 + 2 * (1 - $t) * $t * $cpx + $t * $t * $x2);
-                $by = (int) ((1 - $t) * (1 - $t) * $y1 + 2 * (1 - $t) * $t * $cpy + $t * $t * $y2);
-                imagesetpixel($img, $bx, $by, $lc);
-            }
-        }
-
-        // Tiap karakter: size, angle, warna & posisi Y acak
-        $x = 10;
+        $x = 12;
         foreach (str_split($text) as $char) {
-            $color    = imagecolorallocate($img, rand(0, 80), rand(0, 100), rand(80, 160));
-            $fontSize = rand(20, 26);
-            $angle    = rand(-25, 25);
-            $y        = rand(38, 46);
+            $color    = imagecolorallocate($img, rand(10, 30), rand(10, 30), rand(10, 30)); // nyaris hitam
+            $fontSize = rand(24, 30);
+            $angle    = rand(-20, 20);
+            $y        = rand(40, 48);
 
             imagettftext($img, $fontSize, $angle, $x, $y, $color, $fontPath, $char);
-            $x += rand(28, 36);
+            $x += rand(26, 32);
         }
 
         ob_start();
@@ -197,5 +173,20 @@ class Auth extends BaseController
         }
 
         return null;
+    }
+
+    public function refreshCaptcha()
+    {
+        $chars   = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $captcha = '';
+        for ($i = 0; $i < 5; $i++) {
+            $captcha .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+
+        session()->set('captcha', $captcha);
+
+        return $this->response->setJSON([
+            'image' => $this->generateCaptchaImage($captcha),
+        ]);
     }
 }

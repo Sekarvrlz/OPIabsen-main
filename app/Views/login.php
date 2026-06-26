@@ -25,17 +25,31 @@
             </div>
 
             <div class="field-block">
-                <label for="captcha">Masukkan Captcha</label>
-                <div class="captcha-box">
-                    <img src="<?= $captchaImage ?>" 
-                         alt="captcha" 
-                         title="Klik untuk refresh"
-                         onclick="window.location.reload()">
+                    <label for="captcha">Masukkan Captcha</label>
+                    <div class="captcha-row">
+                        <img id="captchaImg" src="<?= $captchaImage ?>" alt="captcha">
+                        <button type="button" id="btnRefreshCaptcha" title="Refresh captcha">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                                <polyline points="21 3 21 9 15 9" />
+                            </svg>
+                        </button>
+                    </div>
+                    <input id="captcha" type="text" name="captcha"
+                        maxlength="5" required autocomplete="off"
+                        placeholder="Ketik 5 karakter di atas">
                 </div>
-                <input id="captcha" type="text" name="captcha"
-                       maxlength="5" required autocomplete="off"
-                    placeholder="Ketik 5 karakter di atas">
-            </div>
+
+                <script>
+                document.getElementById('btnRefreshCaptcha').addEventListener('click', function () {
+                    fetch('<?= base_url('captcha/refresh') ?>')
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById('captchaImg').src = data.image;
+                            document.getElementById('captcha').value = '';
+                        });
+                });
+                </script>
 
             <button type="submit" class="auth-btn primary block">Login</button>
 

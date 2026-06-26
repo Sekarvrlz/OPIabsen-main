@@ -893,12 +893,21 @@ class IotApiClient:
         return self._decode_response(resp)
 
     def poll_command(self, cfg: DeviceConfig, mode: str, message: str = "") -> dict:
+        import socket
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+        except Exception:
+            local_ip = ""
         params = {
             "device_code": cfg.device_code,
             "device_name": cfg.device_name,
             "mode": mode,
             "message": message[:255],
             "firmware_version": cfg.firmware_version,
+            "ip": local_ip,
         }
         resp = requests.get(
             self.command_url,
