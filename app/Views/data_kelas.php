@@ -10,7 +10,7 @@
     </div>
 </div>
 
-<section class="panel form-card">
+<section class="panel">
     <h3>Tambah Kelas</h3>
     <form action="<?= base_url('master-data/kelas/simpan') ?>" method="post" class="form-grid">
         <?= csrf_field() ?>
