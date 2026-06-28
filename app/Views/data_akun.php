@@ -35,14 +35,9 @@
                                 <div class="actions">
                                     <a href="<?= base_url('admin/akun/edit/' . $row['role'] . '/' . $row['id']) ?>">Edit</a>
                                     <?php if (($row['role'] ?? '') === 'guru'): ?>
-                                        <form action="<?= base_url('admin/akun/hapus/guru/' . $row['id']) ?>" method="post" class="inline-form" onsubmit="return confirmDeleteGuru(this)">
-                                            <input type="hidden" name="delete_guru_data" value="">
-                                            <button type="submit" class="link-danger">Hapus</button>
-                                        </form>
+                                        <a class="danger" href="<?= base_url('admin/akun/hapus/guru/' . $row['id']) ?>" onclick="return confirmDeleteGuruLink(this)">Hapus</a>
                                     <?php else: ?>
-                                        <form action="<?= base_url('admin/akun/hapus/admin/' . $row['id']) ?>" method="post" class="inline-form" onsubmit="return confirm('Yakin hapus akun admin ini?')">
-                                            <button type="submit" class="link-danger">Hapus</button>
-                                        </form>
+                                        <a class="danger" href="<?= base_url('admin/akun/hapus/admin/' . $row['id']) ?>" onclick="return confirm('Yakin hapus akun admin ini?')">Hapus</a>
                                     <?php endif; ?>
                                 </div>
                             </td>

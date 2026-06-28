@@ -12,7 +12,7 @@
     <a class="btn btn-muted" href="<?= base_url('admin/registrasi') ?>">Kembali ke Registrasi</a>
 </div>
 
-<section class="panel form-card">
+<section class="panel">
     <h3>Form Pemetaan</h3>
     <form action="<?= base_url('admin/registrasi/pemetaan/simpan') ?>" method="post" class="form-grid" id="mapping-form">
         <input type="hidden" name="target_id" id="target_id" value="<?= esc(old('target_id', '')) ?>">

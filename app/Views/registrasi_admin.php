@@ -143,7 +143,7 @@ $sessionStatus = strtolower((string) ($activeSession['status'] ?? ''));
     <?php endif; ?>
 </section>
 
-<section class="panel form-card">
+<section class="panel">
     <h3>Form Registrasi Langsung</h3>
     <p class="page-note">Isi data siswa secara lengkap. Jika ada sesi capture aktif, RFID/wajah akan otomatis terisi.</p>
 
