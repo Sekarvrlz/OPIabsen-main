@@ -10,7 +10,7 @@ $summaryTotals = is_array($summaryTotals ?? null) ? $summaryTotals : [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak Laporan Presensi</title>
     <link rel="stylesheet" href="<?= base_url('app-theme.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/print-presensi.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('print-presensi.css') ?>">
 </head>
 <body class="print-page">
     <main class="print-shell">
