@@ -10,6 +10,7 @@ $summaryTotals = is_array($summaryTotals ?? null) ? $summaryTotals : [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak Laporan Presensi</title>
     <link rel="stylesheet" href="<?= base_url('app-theme.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/print-presensi.css') ?>">
 </head>
 <body class="print-page">
     <main class="print-shell">
@@ -17,22 +18,55 @@ $summaryTotals = is_array($summaryTotals ?? null) ? $summaryTotals : [];
             <button class="btn btn-primary" type="button" onclick="window.print()">Print</button>
         </div>
 
-        <section class="print-heading">
+        <div class="print-kop">
             <img class="print-logo" src="<?= base_url('assets/logo-sekolah.png') ?>" alt="Logo sekolah">
-            <div class="print-heading-text">
-                <div class="print-brand">SmartPresence</div>
-                <h2>Daftar Hadir Peserta Didik</h2>
-                <p>Periode: <?= esc($mulai) ?> s.d. <?= esc($akhir) ?></p>
-                <p>Kelas: <?= esc($kelasFilter !== '' ? $kelasFilter : 'Semua') ?></p>
-                <?php if (! empty($shiftStatusFilter ?? [])): ?>
-                    <p>Jadwal/Waktu: <?= esc(implode(', ', array_map(static fn ($status) => (string) (($shiftStatusOptions ?? [])[$status] ?? $status), $shiftStatusFilter))) ?></p>
-                <?php endif; ?>
-                <p>Legenda: H = Hadir, I = Izin, S = Sakit, A = Alpa, - = Belum ada data</p>
+            <div class="print-kop-text">
+                <p class="print-brand"><?= esc($namaSekolah ?? 'SMP Muhammadiyah 1 Pringsewu') ?></p>
+                <p class="print-subbrand"><?= esc($statusAkreditasi ?? 'Terakreditasi A') ?> &bull; NPSN <?= esc($npsn ?? '10804837') ?> &bull; NSS <?= esc($nss ?? '202120600950') ?></p>
+                <p class="print-address"><?= esc($alamatSekolah ?? 'Jl. Pirngadi No. 56 Pringsewu, Kab. Pringsewu') ?></p>
+            </div>
+        </div>
+        <div class="print-kop-line-thick"></div>
+        <div class="print-kop-line-thin"></div>
+
+        <section class="print-heading">
+            <h2>Daftar Hadir Peserta Didik</h2>
+            <div class="print-heading-meta">
+                <div class="print-heading-meta-inner">
+                    <div class="print-meta-row">
+                        <span class="print-meta-label">Periode</span><span class="print-meta-colon">:</span><span class="print-meta-value"><?= esc($mulai) ?> s.d. <?= esc($akhir) ?></span>
+                    </div>
+                    <div class="print-meta-row">
+                        <span class="print-meta-label">Kelas</span><span class="print-meta-colon">:</span><span class="print-meta-value"><?= esc($kelasFilter !== '' ? $kelasFilter : 'Semua') ?></span>
+                    </div>
+                    <?php if (! empty($shiftStatusFilter ?? [])): ?>
+                        <div class="print-meta-row">
+                            <span class="print-meta-label">Jadwal/Waktu</span><span class="print-meta-colon">:</span><span class="print-meta-value"><?= esc(implode(', ', array_map(static fn ($status) => (string) (($shiftStatusOptions ?? [])[$status] ?? $status), $shiftStatusFilter))) ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <div class="print-meta-row">
+                        <span class="print-meta-label">Legenda</span><span class="print-meta-colon">:</span><span class="print-meta-value">H = Hadir, I = Izin, S = Sakit, A = Alpa, - = Belum ada data</span>
+                    </div>
+                </div>
             </div>
         </section>
 
         <div class="table-wrap">
+            <?php $dateColCount = max(count($dateColumns), 1); $dateColWidthPct = round(33 / $dateColCount, 3); ?>
             <table class="data-table attendance-matrix print-matrix">
+                <colgroup>
+                    <col style="width: 4%">
+                    <col style="width: 10%">
+                    <col style="width: 26%">
+                    <col style="width: 7%">
+                    <?php for ($i = 0; $i < $dateColCount; $i++): ?>
+                        <col style="width: <?= $dateColWidthPct ?>%">
+                    <?php endfor; ?>
+                    <col style="width: 5%">
+                    <col style="width: 5%">
+                    <col style="width: 5%">
+                    <col style="width: 5%">
+                </colgroup>
                 <thead>
                     <tr>
                         <th rowspan="2">No</th>
@@ -50,10 +84,10 @@ $summaryTotals = is_array($summaryTotals ?? null) ? $summaryTotals : [];
                         <?php else: ?>
                             <th class="matrix-date">-</th>
                         <?php endif; ?>
-                        <th>H</th>
-                        <th>I</th>
-                        <th>S</th>
-                        <th>A</th>
+                        <th class="matrix-total">H</th>
+                        <th class="matrix-total">I</th>
+                        <th class="matrix-total">S</th>
+                        <th class="matrix-total">A</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,6 +142,26 @@ $summaryTotals = is_array($summaryTotals ?? null) ? $summaryTotals : [];
                 <?php endif; ?>
             </table>
         </div>
+
+        <section class="print-signature">
+            <div class="print-signature-block">
+                <p><?= esc($tempatCetak ?? 'Pringsewu') ?>, <?= esc($tanggalCetak ?? date('d F Y')) ?></p>
+                <p>Mengetahui,<br>Kepala Sekolah</p>
+                <div class="print-signature-space">&nbsp;</div>
+                <p class="print-signature-name">
+                    <strong><?= esc($namaKepalaSekolah ?? 'ANTON HENDRO WIJOYO, S.Kom') ?></strong><br>
+                    NBM. <?= esc($nbmKepalaSekolah ?? '862 883') ?>
+                </p>
+            </div>
+        </section>
+        <!--
+            Catatan: .print-signature memakai "page-break-inside: avoid" (dan
+            "break-inside: avoid-page" untuk browser modern) sehingga kalau
+            blok tanda tangan ini tidak cukup ruang di halaman terakhir tabel,
+            browser akan otomatis mendorongnya utuh ke halaman berikutnya
+            alih-alih memotongnya di tengah saat dicetak.
+        -->
+    
     </main>
 
     <script>
