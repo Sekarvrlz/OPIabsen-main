@@ -28,7 +28,7 @@
                     <label for="captcha">Masukkan Captcha</label>
                     <div class="captcha-row">
                         <img id="captchaImg" src="<?= $captchaImage ?>" alt="captcha">
-                        <button type="button" id="btnRefreshCaptcha" title="Refresh captcha">
+                        <button type="button" id="btnRefreshCaptcha" title="Refresh captcha" style="background-color:#F1F5F2;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                                 <path d="M21 12a9 9 0 1 1-2.64-6.36" />
                                 <polyline points="21 3 21 9 15 9" />
