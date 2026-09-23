@@ -130,8 +130,8 @@ class Presensi extends BaseController
             return redirect()->back()->withInput()->with('error', 'Pilih siswa dan tanggal yang valid.');
         }
 
-        if (! in_array($payload['status'], ['sakit', 'izin', 'alpa'], true)) {
-            return redirect()->back()->withInput()->with('error', 'Status manual hanya boleh Sakit, Izin, atau Alpa.');
+        if (! in_array($payload['status'], ['hadir', 'sakit', 'izin', 'alpa'], true)) {
+             return redirect()->back()->withInput()->with('error', 'Status manual hanya boleh Hadir, Sakit, Izin, atau Alpa.');
         }
 
         if ($payload['catatan'] === '') {

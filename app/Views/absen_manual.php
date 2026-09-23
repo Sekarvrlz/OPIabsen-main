@@ -56,11 +56,11 @@ foreach ($students as $student) {
             <label for="manual_tanggal">Tanggal</label>
             <input id="manual_tanggal" type="date" name="tanggal" value="<?= esc(old('tanggal', $tanggalHariIni)) ?>" required>
         </div>
-
+        
         <div class="field">
             <label for="manual_status">Status</label>
             <select id="manual_status" name="status" required>
-                <?php foreach (['sakit' => 'Sakit', 'izin' => 'Izin', 'alpa' => 'Alpa'] as $value => $label): ?>
+                <?php foreach (['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpa' => 'Alpa'] as $value => $label): ?>
                     <option value="<?= esc($value) ?>" <?= old('status') === $value ? 'selected' : '' ?>>
                         <?= esc($label) ?>
                     </option>
