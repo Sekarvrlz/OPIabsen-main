@@ -118,11 +118,12 @@
         </article>
     </section>
 
-    <section class="panel">
+    <section class="panel compact">
         <h3>Hak Akses Guru</h3>
-        <p>Guru dapat memantau presensi dan melihat riwayat sesuai akses kelas yang ditetapkan oleh admin.</p>
+        <p>Guru dapat memantau presensi seluruh kelas, mengelola data presensi (edit/hapus), dan menginput absen manual.</p>
         <div class="btn-group">
-            <a class="btn btn-primary" href="<?= base_url('presensi') ?>">Buka Presensi</a>
+            <a class="btn btn-primary" href="<?= base_url('presensi/manual') ?>">Absen Manual</a>
+            <a class="btn btn-muted" href="<?= base_url('presensi') ?>">Buka Presensi</a>
             <a class="btn btn-muted" href="<?= base_url('presensi/riwayat') ?>">Lihat Laporan</a>
         </div>
     </section>

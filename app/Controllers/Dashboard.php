@@ -55,7 +55,7 @@ class Dashboard extends BaseController
 
             $data['stats'] = [
                 'jadwal_hari_ini' => $this->countJadwalHariIni($hari, $idGuru, $kelasWali),
-                'presensi_hari_ini' => $this->countPresensiByDateAndKelas($presensiList, date('Y-m-d'), $kelasWali),
+                'presensi_hari_ini' => $this->countPresensiByDate($presensiList, date('Y-m-d')),
                 'kelas_diampu' => $kelasWali !== '' ? 1 : 0,
                 'is_wali_kelas' => $kelasWali !== '' ? 1 : 0,
                 'kelas_wali' => $kelasWali,

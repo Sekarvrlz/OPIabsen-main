@@ -14,7 +14,7 @@ $role = (string) session()->get('role');
         <p><?= esc($hariIni ?? '-') ?>, <?= esc($jamSekarang ?? '-') ?></p>
     </div>
     <div class="btn-group">
-        <?php if ($role === 'admin'): ?>
+        <?php if (in_array($role, ['admin', 'guru'], true)): ?>
             <a class="btn btn-primary" href="<?= base_url('presensi/manual') ?>">Absen Manual</a>
         <?php endif; ?>
         <a class="btn btn-muted" href="<?= base_url('presensi/riwayat') ?>">Laporan Presensi</a>
@@ -71,7 +71,7 @@ $role = (string) session()->get('role');
                     <th>Jadwal/Waktu</th>
                     <th>Metode</th>
                     <th>Catatan</th>
-                    <?php if ($role === 'admin'): ?><th>Aksi</th><?php endif; ?>
+                    <?php if (in_array($role, ['admin', 'guru'], true)): ?><th>Aksi</th><?php endif; ?>
                 </tr>
             </thead>
             <tbody>
@@ -98,7 +98,7 @@ $role = (string) session()->get('role');
                             </td>
                             <td><?= esc((string) ($row['metode'] ?? '-')) ?></td>
                             <td><?= esc((string) (($row['catatan'] ?? '') !== '' ? $row['catatan'] : '-')) ?></td>
-                            <?php if ($role === 'admin'): ?>
+                            <?php if (in_array($role, ['admin', 'guru'], true)): ?>
                                 <td>
                                     <div class="actions">
                                         <form action="<?= base_url('presensi/update/' . (int) ($row['id_presensi'] ?? 0)) ?>" method="post" class="inline-form" onsubmit="return promptEditPresensi(this)">
@@ -118,7 +118,7 @@ $role = (string) session()->get('role');
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="<?= $role === 'admin' ? '11' : '10' ?>">Belum ada presensi yang tercatat hari ini.</td>
+                        <td colspan="<?= in_array($role, ['admin', 'guru'], true) ? '11' : '10' ?>">Belum ada presensi yang tercatat hari ini.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -126,7 +126,7 @@ $role = (string) session()->get('role');
     </div>
 </section>
 
-<?php if ($role === 'admin'): ?>
+<?php if (in_array($role, ['admin', 'guru'], true)): ?>
 <script>
 function promptEditPresensi(form) {
     const status = window.prompt('Status presensi (hadir/izin/sakit/alpa):', form.status.value || 'hadir');

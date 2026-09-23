@@ -22,7 +22,6 @@ class Presensi extends BaseController
 
         $jadwal = $this->safeList($this->client->get('jadwal'));
         $presensi = $this->buildReportRows($this->safeList($this->client->get('presensi')));
-        $presensi = $this->scopeRowsForRole($presensi, (string) session()->get('role'));
 
         $presensiHariIni = array_values(array_filter($presensi, static fn (array $row): bool => $row['tanggal'] === $today));
         $presensiHariIni = $this->dedupeDailyRows($presensiHariIni);
@@ -37,7 +36,7 @@ class Presensi extends BaseController
 
     public function simpan()
     {
-        if ((string) session()->get('role') !== 'admin') {
+        if (! in_array((string) session()->get('role'), ['admin', 'guru'], true)) {
             return redirect()->to('/presensi')->with('error', 'Akses ditolak.');
         }
 
@@ -64,7 +63,7 @@ class Presensi extends BaseController
 
     public function update(int $id)
     {
-        if ((string) session()->get('role') !== 'admin') {
+        if (! in_array((string) session()->get('role'), ['admin', 'guru'], true)) {
             return redirect()->to('/presensi')->with('error', 'Akses ditolak.');
         }
         $payload = [
@@ -83,7 +82,7 @@ class Presensi extends BaseController
 
     public function hapus(int $id)
     {
-        if ((string) session()->get('role') !== 'admin') {
+        if (! in_array((string) session()->get('role'), ['admin', 'guru'], true)) {
             return redirect()->to('/presensi')->with('error', 'Akses ditolak.');
         }
         $response = $this->client->delete('presensi/' . $id);
@@ -106,7 +105,7 @@ class Presensi extends BaseController
 
     public function manualForm()
     {
-        if ((string) session()->get('role') !== 'admin') {
+        if (! in_array((string) session()->get('role'), ['admin', 'guru'], true)) {
             return redirect()->to('/presensi')->with('error', 'Akses ditolak.');
         }
 
@@ -115,7 +114,7 @@ class Presensi extends BaseController
 
     public function manual()
     {
-        if ((string) session()->get('role') !== 'admin') {
+            if (! in_array((string) session()->get('role'), ['admin', 'guru'], true)) {
             return redirect()->to('/presensi')->with('error', 'Akses ditolak.');
         }
 
@@ -189,15 +188,9 @@ class Presensi extends BaseController
         $kelasFilter = trim((string) $this->request->getGet('kelas'));
         $shiftStatusFilter = $this->normalizeShiftStatusFilter($this->request->getGet('shift_status'));
         $role = (string) session()->get('role');
-        $kelasWali = trim((string) session()->get('kelas_wali'));
-        if ($role === 'guru') {
-            $kelasFilter = $kelasWali !== '' ? $kelasWali : '';
-        }
 
         $rows = $this->buildReportRows($this->safeList($this->client->get('presensi')));
-        $rows = $this->scopeRowsForRole($rows, $role);
         $students = $this->buildStudentRows($this->safeList($this->client->get('siswa')));
-        $students = $this->scopeStudentsForRole($students, $role);
 
         $kelasFromRows = [];
         foreach ($rows as $row) {
@@ -211,13 +204,9 @@ class Presensi extends BaseController
             }
         }
 
-        if ($role === 'guru') {
-            $kelasOptions = $kelasWali !== '' ? [$kelasWali] : [];
-        } else {
-            $kelasOptions = $this->getMasterKelasList($kelasFromRows);
-            if ($kelasFilter !== '' && ! in_array($kelasFilter, $kelasOptions, true)) {
-                $kelasOptions = $this->mergeKelasList($kelasOptions, [$kelasFilter]);
-            }
+        $kelasOptions = $this->getMasterKelasList($kelasFromRows);
+        if ($kelasFilter !== '' && ! in_array($kelasFilter, $kelasOptions, true)) {
+            $kelasOptions = $this->mergeKelasList($kelasOptions, [$kelasFilter]);
         }
 
         $rows = array_values(array_filter($rows, static function (array $row) use ($mulai, $akhir, $kelasFilter, $shiftStatusFilter): bool {
@@ -237,10 +226,6 @@ class Presensi extends BaseController
         $dateColumns = $this->buildDateColumns($mulai, $akhir);
         $matrixRows = $this->buildAttendanceMatrix($students, $rows, $dateColumns);
 
-        $scopeInfo = $role === 'guru'
-            ? 'Laporan dibatasi sesuai data presensi pada kelas wali guru.'
-            : '';
-
         return [
             'role' => $role,
             'mulai' => $mulai,
@@ -250,8 +235,6 @@ class Presensi extends BaseController
             'shiftStatusFilter' => $shiftStatusFilter,
             'shiftStatusOptions' => $this->shiftStatusOptions(),
             'cetakQuery' => $this->buildCetakQuery($mulai, $akhir, $kelasFilter, $shiftStatusFilter),
-            'guruTanpaKelas' => $role === 'guru' && $kelasWali === '',
-            'scopeInfo' => $scopeInfo,
             'rows' => $rows,
             'students' => $students,
             'dateColumns' => $dateColumns,
