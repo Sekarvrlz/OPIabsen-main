@@ -1,8 +1,10 @@
+
 <?php
 $jadwalHariIni = is_array($jadwalHariIni ?? null) ? $jadwalHariIni : [];
 $presensiHariIni = is_array($presensiHariIni ?? null) ? $presensiHariIni : [];
 $role = (string) session()->get('role');
 ?>
+
 <?= view('partials/app_start', [
     'title' => 'Presensi Hari Ini',
     'activeNav' => 'presensi',
@@ -100,16 +102,16 @@ $role = (string) session()->get('role');
                             <td><?= esc((string) (($row['catatan'] ?? '') !== '' ? $row['catatan'] : '-')) ?></td>
                             <?php if (in_array($role, ['admin', 'guru'], true)): ?>
                                 <td>
-                                    <div class="actions">
+                                   <div class="actions">
                                         <form action="<?= base_url('presensi/update/' . (int) ($row['id_presensi'] ?? 0)) ?>" method="post" class="inline-form" onsubmit="return promptEditPresensi(this)">
                                             <input type="hidden" name="status" value="<?= esc((string) ($row['status'] ?? 'hadir')) ?>">
                                             <input type="hidden" name="jam" value="<?= esc((string) ($row['jam'] ?? '')) ?>">
                                             <input type="hidden" name="metode" value="<?= esc((string) ($row['metode'] ?? '')) ?>">
                                             <input type="hidden" name="catatan" value="<?= esc((string) ($row['catatan'] ?? '')) ?>">
-                                            <button type="submit">Edit</button>
+                                            <button type="submit" class="link-button">Edit</button>
                                         </form>
                                         <form action="<?= base_url('presensi/hapus/' . (int) ($row['id_presensi'] ?? 0)) ?>" method="post" class="inline-form" onsubmit="return confirm('Yakin hapus data presensi ini?')">
-                                            <button type="submit" class="link-danger">Hapus</button>
+                                            <button type="submit" class="link-button danger">Hapus</button>
                                         </form>
                                     </div>
                                 </td>
