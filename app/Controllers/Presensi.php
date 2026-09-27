@@ -677,7 +677,7 @@ class Presensi extends BaseController
         return [
             'in_shift' => 'Dalam Jadwal',
             'outside_shift' => 'Di Luar Jadwal',
-            'no_schedule' => 'Tanpa Jadwal',
+            'no_schedule' => 'Terlambat',
         ];
     }
 

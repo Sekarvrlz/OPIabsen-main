@@ -39,22 +39,22 @@
                             <td><?= esc((string) ($row['display_name'] ?? '-')) ?></td>
                             <td><?= esc((string) ($row['username'] ?? '-')) ?></td>
                                 <td>
-                                <div class="actions">
-                                    <a href="<?= base_url('admin/akun/edit/' . $row['role'] . '/' . $row['id']) ?>">Edit</a>
-                                    <?php if (($row['role'] ?? '') === 'guru'): ?>
-                                        <form class="inline-delete" method="post" action="<?= base_url('admin/akun/hapus/guru/' . $row['id']) ?>" onsubmit="return confirmDeleteGuru(this)">
-                                            <?= csrf_field() ?>
-                                            <input type="hidden" name="delete_guru_data" value="">
-                                            <button type="submit" class="danger">Hapus</button>
-                                        </form>
-                                    <?php else: ?>
-                                        <form class="inline-delete" method="post" action="<?= base_url('admin/akun/hapus/admin/' . $row['id']) ?>" onsubmit="return confirm('Yakin hapus akun admin ini?')">
-                                            <?= csrf_field() ?>
-                                            <button type="submit" class="danger">Hapus</button>
-                                        </form>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
+                                    <div class="actions">
+                                        <a href="<?= base_url('admin/akun/edit/' . $row['role'] . '/' . $row['id']) ?>">Edit</a>
+                                        <?php if (($row['role'] ?? '') === 'guru'): ?>
+                                            <a class="danger" href="javascript:void(0)" onclick="return hapusGuru('form-hapus-guru-<?= (int) $row['id'] ?>')">Hapus</a>
+                                            <form id="form-hapus-guru-<?= (int) $row['id'] ?>" method="post" action="<?= base_url('admin/akun/hapus/guru/' . $row['id']) ?>" style="display:none;">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="delete_guru_data" value="">
+                                            </form>
+                                        <?php else: ?>
+                                            <a class="danger" href="javascript:void(0)" onclick="return hapusAdmin('form-hapus-admin-<?= (int) $row['id'] ?>')">Hapus</a>
+                                            <form id="form-hapus-admin-<?= (int) $row['id'] ?>" method="post" action="<?= base_url('admin/akun/hapus/admin/' . $row['id']) ?>" style="display:none;">
+                                                <?= csrf_field() ?>
+                                            </form>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -68,17 +68,28 @@
 </section>
 
 <script>
-function confirmDeleteGuru(form) {
+function hapusGuru(formId) {
     const choice = window.prompt('Hapus data guru juga? ketik "yes" untuk hapus data guru, ketik "no" untuk hapus akun saja.');
     if (choice !== 'yes' && choice !== 'no') {
         alert('Wajib pilih "yes" atau "no".');
         return false;
     }
-    form.querySelector('input[name="delete_guru_data"]').value = choice;
-    return confirm(choice === 'yes'
+    const ok = confirm(choice === 'yes'
         ? 'Akun dan data guru akan dihapus. Lanjutkan?'
         : 'Akun login guru akan dihapus, data guru tetap ada. Lanjutkan?');
+    if (ok) {
+        const form = document.getElementById(formId);
+        form.querySelector('input[name="delete_guru_data"]').value = choice;
+        form.submit();
+    }
+    return false;
+}
+
+function hapusAdmin(formId) {
+    if (confirm('Yakin hapus akun admin ini?')) {
+        document.getElementById(formId).submit();
+    }
+    return false;
 }
 </script>
-
 <?= view('partials/app_end') ?>

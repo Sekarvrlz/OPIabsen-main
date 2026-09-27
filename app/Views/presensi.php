@@ -102,18 +102,18 @@ $role = (string) session()->get('role');
                             <td><?= esc((string) (($row['catatan'] ?? '') !== '' ? $row['catatan'] : '-')) ?></td>
                             <?php if (in_array($role, ['admin', 'guru'], true)): ?>
                                 <td>
-                                   <div class="actions">
-                                        <form action="<?= base_url('presensi/update/' . (int) ($row['id_presensi'] ?? 0)) ?>" method="post" class="inline-form" onsubmit="return promptEditPresensi(this)">
-                                            <input type="hidden" name="status" value="<?= esc((string) ($row['status'] ?? 'hadir')) ?>">
-                                            <input type="hidden" name="jam" value="<?= esc((string) ($row['jam'] ?? '')) ?>">
-                                            <input type="hidden" name="metode" value="<?= esc((string) ($row['metode'] ?? '')) ?>">
-                                            <input type="hidden" name="catatan" value="<?= esc((string) ($row['catatan'] ?? '')) ?>">
-                                            <button type="submit" class="link-button">Edit</button>
-                                        </form>
-                                        <form action="<?= base_url('presensi/hapus/' . (int) ($row['id_presensi'] ?? 0)) ?>" method="post" class="inline-form" onsubmit="return confirm('Yakin hapus data presensi ini?')">
-                                            <button type="submit" class="link-button danger">Hapus</button>
-                                        </form>
-                                    </div>
+                                <div class="actions">
+                                    <a href="javascript:void(0)" onclick="return editPresensi('form-edit-presensi-<?= (int) ($row['id_presensi'] ?? 0) ?>')">Edit</a>
+                                    <form id="form-edit-presensi-<?= (int) ($row['id_presensi'] ?? 0) ?>" method="post" action="<?= base_url('presensi/update/' . (int) ($row['id_presensi'] ?? 0)) ?>" style="display:none;">
+                                        <input type="hidden" name="status" value="<?= esc((string) ($row['status'] ?? 'hadir')) ?>">
+                                        <input type="hidden" name="jam" value="<?= esc((string) ($row['jam'] ?? '')) ?>">
+                                        <input type="hidden" name="metode" value="<?= esc((string) ($row['metode'] ?? '')) ?>">
+                                        <input type="hidden" name="catatan" value="<?= esc((string) ($row['catatan'] ?? '')) ?>">
+                                    </form>
+
+                                    <a class="danger" href="javascript:void(0)" onclick="return hapusPresensi('form-hapus-presensi-<?= (int) ($row['id_presensi'] ?? 0) ?>')">Hapus</a>
+                                    <form id="form-hapus-presensi-<?= (int) ($row['id_presensi'] ?? 0) ?>" method="post" action="<?= base_url('presensi/hapus/' . (int) ($row['id_presensi'] ?? 0)) ?>" style="display:none;"></form>
+                                </div>
                                 </td>
                             <?php endif; ?>
                         </tr>
@@ -130,7 +130,8 @@ $role = (string) session()->get('role');
 
 <?php if (in_array($role, ['admin', 'guru'], true)): ?>
 <script>
-function promptEditPresensi(form) {
+function editPresensi(formId) {
+    const form = document.getElementById(formId);
     const status = window.prompt('Status presensi (hadir/izin/sakit/alpa):', form.status.value || 'hadir');
     if (status === null) return false;
     const jam = window.prompt('Jam presensi (HH:MM):', form.jam.value || '');
@@ -143,7 +144,15 @@ function promptEditPresensi(form) {
     form.jam.value = jam.trim();
     form.metode.value = metode.trim();
     form.catatan.value = catatan.trim();
-    return true;
+    form.submit();
+    return false;
+}
+
+function hapusPresensi(formId) {
+    if (confirm('Yakin hapus data presensi ini?')) {
+        document.getElementById(formId).submit();
+    }
+    return false;
 }
 </script>
 <?php endif; ?>

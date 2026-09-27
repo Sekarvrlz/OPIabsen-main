@@ -1276,7 +1276,7 @@ button[disabled] {
     margin: 0;
 }
 
-.actions form.inline-delete button.danger {
+.actions button {
     -webkit-appearance: none;
     appearance: none;
     font: inherit;
@@ -1284,12 +1284,18 @@ button[disabled] {
     display: inline-flex;
     align-items: center;
     min-height: 32px;
-    border: 1px solid #f5b7ad;
+    border: 1px solid #cbe1da;
     border-radius: var(--radius);
-    background: var(--danger-soft);
-    color: #8f1f14;
+    background: #f6fbf9;
+    color: var(--primary-strong);
     padding: 6px 10px;
     font-size: 12px;
     font-weight: 800;
     text-decoration: none;
+}
+
+.actions button.danger {
+    color: #8f1f14;
+    border-color: #f5b7ad;
+    background: var(--danger-soft);
 }
