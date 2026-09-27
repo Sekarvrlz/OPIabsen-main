@@ -3,7 +3,7 @@
     'activeNav' => 'akun',
 ]) ?>
 
-<section class="panel form-card">
+<section class="panel">
     <h3><?= esc($title ?? 'Form Akun') ?></h3>
     <form action="<?= esc($action) ?>" method="post" class="form-grid">
         <?php

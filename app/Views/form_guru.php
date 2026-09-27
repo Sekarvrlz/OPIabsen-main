@@ -6,7 +6,7 @@ $selectedKelasWali = (string) old('kelas_wali', $guru['kelas_wali'] ?? '');
     'activeNav' => 'guru',
 ]) ?>
 
-<section class="panel form-card">
+<section class="panel">
     <h3><?= esc($title ?? 'Form Guru') ?></h3>
     <form action="<?= esc($action) ?>" method="post" class="form-grid">
         <div class="field">

@@ -24,7 +24,7 @@ $selectedHari = is_array($rawHari) ? array_values($rawHari) : [];
     'activeNav' => 'jadwal',
 ]) ?>
 
-<section class="panel form-card">
+<section class="panel">
     <h3><?= esc($title ?? 'Form Jadwal') ?></h3>
     <form action="<?= esc($action) ?>" method="post" class="form-grid" id="jadwalForm">
         <div class="info-box">
