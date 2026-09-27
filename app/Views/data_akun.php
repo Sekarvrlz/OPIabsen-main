@@ -11,6 +11,13 @@
     <a class="btn btn-primary" href="<?= base_url('admin/akun/tambah') ?>">Tambah Akun</a>
 </div>
 
+<?php if (session()->getFlashdata('error')): ?>
+    <div class="alert alert-danger"><?= esc(session()->getFlashdata('error')) ?></div>
+<?php endif; ?>
+<?php if (session()->getFlashdata('success')): ?>
+    <div class="alert alert-success"><?= esc(session()->getFlashdata('success')) ?></div>
+<?php endif; ?>
+
 <section class="panel">
     <div class="table-wrap">
         <table class="data-table compact">
@@ -31,13 +38,20 @@
                             <td><?= esc((string) ($row['id'] ?? '-')) ?></td>
                             <td><?= esc((string) ($row['display_name'] ?? '-')) ?></td>
                             <td><?= esc((string) ($row['username'] ?? '-')) ?></td>
-                            <td>
+                                <td>
                                 <div class="actions">
                                     <a href="<?= base_url('admin/akun/edit/' . $row['role'] . '/' . $row['id']) ?>">Edit</a>
                                     <?php if (($row['role'] ?? '') === 'guru'): ?>
-                                        <a class="danger" href="<?= base_url('admin/akun/hapus/guru/' . $row['id']) ?>" onclick="return confirmDeleteGuruLink(this)">Hapus</a>
+                                        <form class="inline-delete" method="post" action="<?= base_url('admin/akun/hapus/guru/' . $row['id']) ?>" onsubmit="return confirmDeleteGuru(this)">
+                                            <?= csrf_field() ?>
+                                            <input type="hidden" name="delete_guru_data" value="">
+                                            <button type="submit" class="danger">Hapus</button>
+                                        </form>
                                     <?php else: ?>
-                                        <a class="danger" href="<?= base_url('admin/akun/hapus/admin/' . $row['id']) ?>" onclick="return confirm('Yakin hapus akun admin ini?')">Hapus</a>
+                                        <form class="inline-delete" method="post" action="<?= base_url('admin/akun/hapus/admin/' . $row['id']) ?>" onsubmit="return confirm('Yakin hapus akun admin ini?')">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="danger">Hapus</button>
+                                        </form>
                                     <?php endif; ?>
                                 </div>
                             </td>

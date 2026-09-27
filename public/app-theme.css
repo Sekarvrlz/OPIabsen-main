@@ -1271,3 +1271,25 @@ button[disabled] {
     align-items: end;
 }
 
+.actions form.inline-delete {
+    display: inline-flex;
+    margin: 0;
+}
+
+.actions form.inline-delete button.danger {
+    -webkit-appearance: none;
+    appearance: none;
+    font: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    border: 1px solid #f5b7ad;
+    border-radius: var(--radius);
+    background: var(--danger-soft);
+    color: #8f1f14;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+}
