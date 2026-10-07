@@ -1,12 +1,15 @@
-# Sinkronisasi Microservice IoT Absensi
+# Sinkronisasi Sistem IoT Absensi (Laravel Native API)
 
-Dokumen ini merangkum sinkronisasi antara:
-1. CodeIgniter (`D:\TugasAkhir-presensi`)
-2. Laravel Gateway (`D:\face recog\laravel-gateway`)
-3. FastAPI Face Engine (`D:\face recog\laravel-gateway\fastapi-engine`)
-4. Device OrangePi (`iot-device/device_service.py`)
+Dokumen ini merangkum arsitektur dan sinkronisasi antara:
+1. **Frontend / Web Management (CodeIgniter 4)**
+2. **Backend API & Face Recognition (Laravel API)**
+3. **Hardware Device OrangePi Zero 3 (`iot-device/device_service.py`)**
 
-## 1) Konfigurasi token dan URL
+> **Catatan Revisi:** FastAPI telah dihilangkan dan seluruh fungsionalitas pengenalan wajah, pendaftaran landmark, serta API presensi diproses langsung di **Laravel API**. Presensi dapat dilakukan menggunakan **RFID saja**, **Wajah saja**, ataupun **keduanya**.
+
+---
+
+## 1) Konfigurasi Token dan URL
 
 ### CodeIgniter `.env`
 - `faceGateway.baseURL=http://127.0.0.1:8000/api`
@@ -14,84 +17,85 @@ Dokumen ini merangkum sinkronisasi antara:
 - `iotDevice.deviceToken=orange-pi-zero3-token`
 - `iotDevice.deviceOnlineWindowSec=45`
 - `iotDevice.registerSessionTimeoutSec=300`
-- Saat testing LAN:
-  - Device OrangePi: `192.168.0.101`
-  - Server aplikasi: `192.168.0.104`
 
-### Laravel Gateway `.env`
+### Laravel API `.env`
 - `FACE_GATEWAY_BEARER_TOKEN=absensiiot2026-token`
-- `FACE_ENGINE_BASE_URL=http://127.0.0.1:8001`
-- `FACE_ENGINE_TOKEN=internal-face-engine-token`
+- `IOT_DEVICE_TOKEN=orange-pi-zero3-token`
+- `ATTENDANCE_REQUIRE_DUAL_FACTOR=false`
 
-### FastAPI Engine `.env`
-- `FACE_ENGINE_TOKEN=internal-face-engine-token`
-
-### Device `.env`
+### Device OrangePi `.env`
 - `DEVICE_CODE=orange-pi-zero3-01`
 - `DEVICE_NAME=OrangePi Zero3 #1`
-- `IOT_API_URL=http://192.168.0.104:8080/api/iot/scan`
-- `IOT_HEALTH_URL=http://192.168.0.104:8080/api/iot/health`
-- `IOT_HEARTBEAT_URL=http://192.168.0.104:8080/api/iot/device/heartbeat`
-- `IOT_COMMAND_URL=http://192.168.0.104:8080/api/iot/device/command`
-- `IOT_REGISTER_CAPTURE_URL=http://192.168.0.104:8080/api/iot/register/capture`
+- `IOT_API_URL=http://<IP_SERVER_LARAVEL>:8000/api/iot/scan`
+- `IOT_HEALTH_URL=http://<IP_SERVER_LARAVEL>:8000/api/iot/health`
+- `IOT_HEARTBEAT_URL=http://<IP_SERVER_LARAVEL>:8000/api/iot/device/heartbeat`
+- `IOT_COMMAND_URL=http://<IP_SERVER_LARAVEL>:8000/api/iot/device/command`
+- `IOT_REGISTER_CAPTURE_URL=http://<IP_SERVER_LARAVEL>:8000/api/iot/register/capture`
 - `IOT_DEVICE_TOKEN=orange-pi-zero3-token`
+- `ATTENDANCE_AUTH_MODE=any` *(Opsi: `any` (RFID atau Wajah), `rfid`, `face`, `both`)*
 
-## 2) Endpoint utama
+---
 
-### CodeIgniter
-- `GET /api/iot/health`
-- `POST /api/iot/scan` (mendukung `rfid_uid` saja, `image` saja, atau keduanya)
-- `POST /api/iot/device/heartbeat`
-- `GET /api/iot/device/command`
-- `POST /api/iot/register/capture`
+## 2) Endpoint Utama (Laravel API)
 
-### Laravel Gateway
-- `POST /api/face/register`
-- `POST /api/face/attendance`
+### IoT Device Endpoints
+- `GET  /api/iot/health` (Cek status service IoT)
+- `POST /api/iot/scan` (Mendukung `rfid_uid` saja, `image` saja, atau keduanya)
+- `POST /api/iot/device/heartbeat` (Sinyal online & status mode device)
+- `GET  /api/iot/device/command` (Polling perintah mode registrasi)
+- `POST /api/iot/register/capture` (Mengirim hasil capture registrasi kartu + wajah)
 
-### FastAPI
-- `GET /health`
-- `POST /v1/register`
-- `POST /v1/attendance`
+### Face Recognition Endpoints
+- `POST /api/face/register` (Registrasi wajah siswa/guru + kalkulasi landmark SVG)
+- `POST /api/face/attendance` (Verifikasi absensi wajah)
+- `GET  /api/face/landmark` (Mengambil data landmark & mesh vektor wajah)
 
-## 3) Jalankan service
+---
 
-### CodeIgniter
+## 3) Cara Menjalankan Layanan
+
+### A. Backend Laravel API
 ```bash
-cd D:\TugasAkhir-presensi
-php spark serve --host=0.0.0.0 --port=8080
-```
-
-### Laravel Gateway
-```bash
-cd "D:\face recog\laravel-gateway"
+cd "E:\Presensi IOT\OPIabsensi"
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-### FastAPI Engine
+### B. Frontend CodeIgniter Web
 ```bash
-cd "D:\face recog\laravel-gateway\fastapi-engine"
-.venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8001
+cd "E:\Presensi IOT\OPIabsen-main"
+php spark serve --host=0.0.0.0 --port=8080
 ```
 
-### Device service
+### C. Client Device OrangePi
 ```bash
-cd D:\TugasAkhir-presensi\iot-device
+cd "E:\Presensi IOT\OPIabsen-main\iot-device"
 python device_service.py
 ```
 
-## 4) Cek kesehatan sinkronisasi
+---
+
+## 4) Cek Kesehatan Sinkronisasi
 
 ```bash
-cd D:\TugasAkhir-presensi
+cd "E:\Presensi IOT\OPIabsen-main"
 python iot-device/microservice_healthcheck.py
 ```
 
-## 5) Alur `ON REGIS` end-to-end
+---
 
-1. Admin membuka halaman registrasi dan memilih device online.
-2. Klik `ON REGIS`, server membuat session registrasi untuk device.
-3. Device polling command endpoint lalu masuk mode register.
-4. Device kirim hasil `rfid_uid + image` ke `/api/iot/register/capture`.
-5. Halaman admin polling status session lalu autofill data.
-6. Admin pilih siswa/guru dan simpan; wajah disinkronkan ke Laravel gateway.
+## 5) Alur Presensi Fleksibel (RFID atau Wajah)
+
+1. **Opsi A - Scan Kartu RFID Saja:**
+   - Pengguna menempelkan kartu RFID ke reader.
+   - Device mengirim `rfid_uid` ke `/api/iot/scan`.
+   - Server memvalidasi identitas dan shift jadwal, lalu langsung menyimpan presensi **Hadir** (`auth_mode: rfid_only`).
+   - Layar LCD menampilkan nama siswa/guru dan LED hijau menyala.
+
+2. **Opsi B - Deteksi Wajah Saja:**
+   - Pengguna berdiri di depan kamera.
+   - Device menangkap frame wajah dan mengirim foto ke `/api/iot/scan`.
+   - Server mencocokkan kemiripan wajah via *cosine similarity*, lalu langsung menyimpan presensi **Hadir** (`auth_mode: face_only`).
+   - Layar LCD menampilkan nama siswa/guru dan LED hijau menyala.
+
+3. **Opsi C - Scan RFID + Wajah Sekaligus:**
+   - Jika kedua data dikirimkan bersamaan, server memvalidasi kecocokan kartu dan wajah (`auth_mode: rfid_face`).

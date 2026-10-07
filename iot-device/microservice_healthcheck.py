@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Simple health check for all SmartPresence microservices."""
+"""Health check for Presensi IoT services (Laravel Backend & CodeIgniter Frontend)."""
 
 from __future__ import annotations
 
@@ -53,31 +53,27 @@ def main() -> int:
     else:
         load_env_file_fallback(".env")
 
-    ci_health = os.getenv("IOT_HEALTH_URL", "http://127.0.0.1:80/api/iot/health")
-    ci_token = os.getenv("IOT_DEVICE_TOKEN", "") or os.getenv("iotDevice.deviceToken", "")
-
-    gateway_url = os.getenv("FACE_GATEWAY_URL", "http://127.0.0.1:8000/api/face/landmark")
-    gateway_token = os.getenv("FACE_GATEWAY_BEARER_TOKEN", "") or os.getenv("faceGateway.bearerToken", "absensiiot2026-token")
-
-    engine_url = os.getenv("FACE_ENGINE_HEALTH_URL", "http://127.0.0.1:8001/health")
+    device_token = os.getenv("IOT_DEVICE_TOKEN", "orange-pi-zero3-token")
+    laravel_iot_health = os.getenv("IOT_HEALTH_URL", "http://127.0.0.1:8000/api/iot/health")
+    laravel_api_url = os.getenv("FACE_GATEWAY_URL", "http://127.0.0.1:8000/api/face/landmark")
+    laravel_bearer = os.getenv("FACE_GATEWAY_BEARER_TOKEN", "absensiiot2026-token")
 
     checks = [
         (
-            "CodeIgniter IoT",
-            ci_health,
-            {"X-Device-Token": ci_token} if ci_token else {},
-            None,
+            "Laravel IoT API",
+            laravel_iot_health,
+            {"X-Device-Token": device_token} if device_token else {},
+            {200},
         ),
         (
-            "Laravel Gateway",
-            gateway_url,
-            {"Authorization": f"Bearer {gateway_token}"} if gateway_token else {},
+            "Laravel Face API",
+            laravel_api_url,
+            {"Authorization": f"Bearer {laravel_bearer}"} if laravel_bearer else {},
             {200, 401, 403, 422},
         ),
-        ("FastAPI Engine", engine_url, {}, None),
     ]
 
-    print("=== Microservice Health Check ===")
+    print("=== Presensi IoT Health Check (Laravel API Native) ===")
     failed = 0
     for name, url, headers, accepted_statuses in checks:
         ok, detail = check(url, headers=headers, accepted_statuses=accepted_statuses)
@@ -90,7 +86,7 @@ def main() -> int:
         print(f"\nTotal gagal: {failed}")
         return 1
 
-    print("\nSemua microservice online.")
+    print("\nSemua service backend online & siap digunakan.")
     return 0
 
 

@@ -195,7 +195,7 @@ class DeviceConfig:
             face_event_cooldown_sec=env_float("FACE_EVENT_COOLDOWN_SEC", 3.0),
             face_min_size=env_int("FACE_MIN_SIZE", 50),
             face_force_capture_sec=env_float("FACE_FORCE_CAPTURE_SEC", 3.0),
-            attendance_auth_mode=os.getenv("ATTENDANCE_AUTH_MODE", "both").strip().lower(),
+            attendance_auth_mode=os.getenv("ATTENDANCE_AUTH_MODE", "any").strip().lower(),
             attendance_attempt_cooldown_sec=env_float("ATTENDANCE_ATTEMPT_COOLDOWN_SEC", 2.5),
             face_retry_max_attempts=max(1, env_int("FACE_RETRY_MAX_ATTEMPTS", 3)),
             rfid_face_wait_timeout_sec=max(3.0, env_float("RFID_FACE_WAIT_TIMEOUT_SEC", 20.0)),
@@ -1011,7 +1011,14 @@ def is_endpoint_error(payload: dict) -> bool:
 
 
 def resolve_attendance_auth_mode(raw: str) -> str:
-    return "both"
+    mode = (raw or "").strip().lower()
+    if mode in {"rfid", "rfid_only"}:
+        return "rfid"
+    if mode in {"face", "face_only"}:
+        return "face"
+    if mode in {"both", "dual", "rfid_face"}:
+        return "both"
+    return "any"
 
 
 def main() -> int:
@@ -1023,9 +1030,7 @@ def main() -> int:
     print(f"IOT HLT : {cfg.iot_health_url}")
     print(f"RFID    : {cfg.rfid_mode}")
     attendance_auth_mode = resolve_attendance_auth_mode(cfg.attendance_auth_mode)
-    if (cfg.attendance_auth_mode or "").strip().lower() != "both":
-        print("[WARN] ATTENDANCE_AUTH_MODE dipaksa ke 'both' (wajib RFID + wajah).")
-    print(f"AUTH    : {attendance_auth_mode}")
+    print(f"AUTH    : {attendance_auth_mode} (RFID atau Wajah)")
 
     camera = Camera(cfg)
     face_detector = FaceDetector(cfg.face_min_size)
@@ -1159,7 +1164,7 @@ def main() -> int:
                     else:
                         display.show("MODE REGISTRASI", f"SID {active_session_id or '-'}")
                 else:
-                    display.show("Kamera Standby", "Tap RFID dulu")
+                    display.show("Presensi Standby", "Tap Kartu/Wajah")
                 last_mode_key = mode_key
                 last_standby_at = now
 
@@ -1177,47 +1182,89 @@ def main() -> int:
                     last_message = f"RFID terbaca: {uid}"
 
                     if mode == "attendance":
-                        try:
-                            precheck = api.send_scan(rfid_uid=uid, image_bytes=None, intent="precheck")
-                        except Exception as exc:
-                            msg = f"Gagal validasi RFID: {exc}"
-                            print(f"[ERROR] {msg}")
-                            display.show("Kartu Gagal", "API error")
-                            led.error()
-                            last_message = msg
-                            clear_attendance_rfid_session()
-                            time.sleep(0.05)
-                        else:
-                            status = str(precheck.get("status") or "").lower()
-                            message = str(precheck.get("message") or "")
-                            identity = (
-                                precheck.get("identity")
-                                if isinstance(precheck.get("identity"), dict)
-                                else {}
-                            )
-                            name = str(identity.get("name") or "")
-                            print(
-                                "[RFID-PRECHECK] "
-                                f"status={status} http={precheck.get('http_status')} msg={message}"
-                            )
-
-                            if status == "verified":
-                                rfid_cache_uid = uid
-                                rfid_cache_at = now
-                                face_retry_attempts = 0
-                                display.show("Kartu Valid", "Arahkan wajah")
-                                led.info()
-                                last_message = f"RFID valid: {name or uid}. Menunggu wajah."
-                            elif is_endpoint_error(precheck):
-                                clear_attendance_rfid_session()
-                                display.show("Endpoint Salah", "Cek IOT_API")
+                        if attendance_auth_mode in {"any", "rfid"}:
+                            try:
+                                result = api.send_scan(rfid_uid=uid, image_bytes=None, intent="attendance")
+                            except Exception as exc:
+                                msg = f"Gagal validasi RFID: {exc}"
+                                print(f"[ERROR] {msg}")
+                                display.show("Kartu Gagal", "API error")
                                 led.error()
-                                last_message = str(precheck.get("message") or "Endpoint IoT salah/non-JSON.")
+                                last_message = msg
+                                clear_attendance_rfid_session()
+                                time.sleep(0.05)
                             else:
-                                clear_attendance_rfid_session()
-                                display.show("Kartu TidakValid", "Daftar dulu")
+                                status = str(result.get("status") or "").lower()
+                                message = str(result.get("message") or "")
+                                identity = (
+                                    result.get("identity")
+                                    if isinstance(result.get("identity"), dict)
+                                    else {}
+                                )
+                                name = str(identity.get("name") or "")
+                                print(
+                                    f"[ABSEN-RFID] status={status} http={result.get('http_status')} name={name} msg={message}"
+                                )
+
+                                if status == "verified":
+                                    display.show("Selamat Absen", trim16(name or "Terverifikasi"))
+                                    led.success()
+                                    last_message = f"Selamat absen (RFID): {name or uid}"
+                                    last_attendance_attempt_at = now
+                                    clear_attendance_rfid_session()
+                                    time.sleep(0.3)
+                                elif is_endpoint_error(result):
+                                    clear_attendance_rfid_session()
+                                    display.show("Endpoint Salah", "Cek IOT_API")
+                                    led.error()
+                                    last_message = str(result.get("message") or "Endpoint IoT salah/non-JSON.")
+                                else:
+                                    clear_attendance_rfid_session()
+                                    display.show("Gagal Absen", build_fail_line(message))
+                                    led.error()
+                                    last_message = f"RFID gagal: {message}"
+                        else:
+                            try:
+                                precheck = api.send_scan(rfid_uid=uid, image_bytes=None, intent="precheck")
+                            except Exception as exc:
+                                msg = f"Gagal validasi RFID: {exc}"
+                                print(f"[ERROR] {msg}")
+                                display.show("Kartu Gagal", "API error")
                                 led.error()
-                                last_message = f"RFID tidak valid: {message}"
+                                last_message = msg
+                                clear_attendance_rfid_session()
+                                time.sleep(0.05)
+                            else:
+                                status = str(precheck.get("status") or "").lower()
+                                message = str(precheck.get("message") or "")
+                                identity = (
+                                    precheck.get("identity")
+                                    if isinstance(precheck.get("identity"), dict)
+                                    else {}
+                                )
+                                name = str(identity.get("name") or "")
+                                print(
+                                    "[RFID-PRECHECK] "
+                                    f"status={status} http={precheck.get('http_status')} msg={message}"
+                                )
+
+                                if status == "verified":
+                                    rfid_cache_uid = uid
+                                    rfid_cache_at = now
+                                    face_retry_attempts = 0
+                                    display.show("Kartu Valid", "Arahkan wajah")
+                                    led.info()
+                                    last_message = f"RFID valid: {name or uid}. Menunggu wajah."
+                                elif is_endpoint_error(precheck):
+                                    clear_attendance_rfid_session()
+                                    display.show("Endpoint Salah", "Cek IOT_API")
+                                    led.error()
+                                    last_message = str(precheck.get("message") or "Endpoint IoT salah/non-JSON.")
+                                else:
+                                    clear_attendance_rfid_session()
+                                    display.show("Kartu TidakValid", "Daftar dulu")
+                                    led.error()
+                                    last_message = f"RFID tidak valid: {message}"
                     else:
                         rfid_cache_uid = uid
                         rfid_cache_at = now
@@ -1314,7 +1361,8 @@ def main() -> int:
                             cfg.rfid_face_wait_timeout_sec,
                             now,
                         )
-                        if not recent_rfid_for_face:
+
+                        if attendance_auth_mode == "both" and not recent_rfid_for_face:
                             if rfid_cache_uid:
                                 display.show("Sesi Kartu Habis", "Tap kartu ulang")
                                 led.error()
@@ -1326,10 +1374,11 @@ def main() -> int:
                                 last_message = "Wajah terdeteksi namun card RFID tidak terdeteksi."
                             continue
 
+                        scan_rfid = rfid_cache_uid if recent_rfid_for_face else None
                         last_attendance_attempt_at = now
                         try:
                             result = api.send_scan(
-                                rfid_uid=rfid_cache_uid,
+                                rfid_uid=scan_rfid,
                                 image_bytes=image_bytes,
                                 intent="attendance",
                             )
@@ -1368,7 +1417,7 @@ def main() -> int:
                         auth_mode_resp = str(result.get("auth_mode") or "")
                         print(
                             f"[ABSEN] mode={auth_mode_resp or attendance_auth_mode} "
-                            f"status={status} http={result.get('http_status')} msg={message}"
+                            f"status={status} http={result.get('http_status')} name={name} msg={message}"
                         )
 
                         if status == "verified":
@@ -1376,6 +1425,7 @@ def main() -> int:
                             led.success()
                             last_message = f"Selamat absen: {name or 'terverifikasi'}"
                             clear_attendance_rfid_session()
+                            time.sleep(0.3)
                         elif is_endpoint_error(result):
                             display.show("Endpoint Salah", "Cek IOT_API")
                             led.error()
@@ -1403,7 +1453,7 @@ def main() -> int:
                                     f"{cfg.face_retry_max_attempts} percobaan."
                                 )
                                 clear_attendance_rfid_session()
-                elif mode == "attendance":
+                elif mode == "attendance" and attendance_auth_mode == "both":
                     recent_rfid_for_face = is_recent_rfid(
                         rfid_cache_uid,
                         rfid_cache_at,
@@ -1499,13 +1549,13 @@ def main() -> int:
                     else:
                         display.show("Mode Regis ON", "Tap kartu RFID")
                 else:
-                    if recent_rfid_now:
+                    if recent_rfid_now and attendance_auth_mode == "both":
                         display.show(
                             f"RFID Valid {face_retry_attempts}/{cfg.face_retry_max_attempts}",
                             "Arahkan wajah",
                         )
                     else:
-                        display.show("Kamera Standby", "Tap RFID dulu")
+                        display.show("Presensi Standby", "Tap Kartu/Wajah")
                 last_standby_at = now
 
             time.sleep(0.03)
